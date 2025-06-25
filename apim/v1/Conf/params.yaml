@@ -1,67 +1,35 @@
 environments:
   - name: dev
-    configs:
+    configs:  
       endpoints:
         production:
-          url: https://dev.x.com/iam/scim
+          url: https://localhost:9443/am/sample/pizzashack/v1/api/
+        sandbox: 
+          url: https://localhost:9443/am/sample/pizzashack/v1/api/   
       deploymentEnvironments:
         - displayOnDevportal: true
-          deploymentEnvironment: Default
-          deploymentVhost: localhost
+          deploymentEnvironment: UniversalGW
+          deploymentVhost: apim.dev.apis.coach
       certs:
-        - hostName: dev.x.com
+        - hostName: apim.dev.apis.coach
           alias: backendDev
           path: backendDev.crt
       policies:
-        - Gold
-
-  - name: qa
-    configs:
-      endpoints:
-        production:
-          url: https://qa.x.com/iam/scim
-      deploymentEnvironments:
-        - displayOnDevportal: true
-          deploymentEnvironment: Default
-          deploymentVhost: localhost
-      certs:
-        - hostName: qa.x.com
-          alias: backendQA
-          path: backendQA.crt
-      policies:
-        - Unlimited
         - Gold
 
   - name: uat
     configs:
       endpoints:
         production:
-          url: https://uat.x.com/iam/scim
+          url: https://localhost:9443/am/sample/pizzashack/v1/api/
       deploymentEnvironments:
         - displayOnDevportal: true
-          deploymentEnvironment: Default
-          deploymentVhost: localhost
+          deploymentEnvironment: UniversalGW
+          deploymentVhost: apim.uat.apis.coach
       certs:
-        - hostName: uat.x.com
+        - hostName: apim.uat.apis.coach
           alias: backendUAT
           path: backendUAT.crt
-      policies:
-        - Unlimited
-        - Gold
-
-  - name: prod
-    configs:
-      endpoints:
-        production:
-          url: https://x.com/iam/scim
-      deploymentEnvironments:
-        - displayOnDevportal: true
-          deploymentEnvironment: Default
-          deploymentVhost: localhost
-      certs:
-        - hostName: x.com
-          alias: backendPROD
-          path: backendPROD.crt
       policies:
         - Unlimited
         - Gold
