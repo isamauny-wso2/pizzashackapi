@@ -1,7 +1,7 @@
 deploy:
   import:
-    preserveProvider: false
-    rotateRevision: true
+    preserveProvider: true
+    rotateRevision: false
     update: true
-name: Identity Sys
-version: v1
+name: PizzaShackAPI
+version: 1.0.0
