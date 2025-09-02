@@ -1,0 +1,108 @@
+name: Extract and Validate API Properties
+
+on:
+  workflow_call:
+    inputs:
+      zip_path:
+        description: 'Path to the ZIP file containing API properties'
+        required: true
+        type: string
+
+jobs:
+  validate-properties:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Extract and print custom properties
+        id: extract-properties
+        run: |
+          echo "Extracting properties from ZIP file"
+          echo "================================================="
+          
+          # Use the provided ZIP file path
+          ZIP_FILE="${{ inputs.zip_path }}"
+          
+          if [[ ! -f "$ZIP_FILE" ]]; then
+            echo "Error: ZIP file not found at: $ZIP_FILE"
+            exit 1
+          fi
+          
+          echo "Found ZIP file: $ZIP_FILE"
+          
+          # Extract ZIP file
+          TEMP_DIR=$(mktemp -d)
+          unzip -q "$ZIP_FILE" -d "$TEMP_DIR"
+          
+          # Find api.yaml
+          API_YAML=$(find "$TEMP_DIR" -name "api.yaml" -type f)
+          
+          if [[ -z "$API_YAML" ]]; then
+            echo "Error: api.yaml not found in ZIP file"
+            exit 1
+          fi
+          
+          echo "Found api.yaml: $API_YAML"
+          echo ""
+          
+          # Extract all custom properties dynamically
+          echo "Extracting Custom Properties:"
+          echo "============================="
+          
+          # Create JSON file for properties
+          PROPERTIES_FILE="extracted-properties.json"
+          echo "{" > "$PROPERTIES_FILE"
+          
+          # Find all property sections and extract their values
+          PROPERTIES=$(grep -n ":" "$API_YAML" | grep -E "^\s*[A-Za-z][A-Za-z0-9_-]*:\s*$" | sed 's/[0-9]*:\s*//' | sed 's/:\s*$//')
+          
+          FIRST=true
+          while IFS= read -r PROPERTY_NAME; do
+            if [[ -n "$PROPERTY_NAME" && "$PROPERTY_NAME" != "additionalProperties" ]]; then
+              # Extract the value for this property
+              PROPERTY_VALUE=$(grep -A 3 "$PROPERTY_NAME:" "$API_YAML" | grep "value:" | head -1 | awk '{print $2}' | tr -d '"')
+              
+              if [[ -n "$PROPERTY_VALUE" ]]; then
+                echo "$PROPERTY_NAME: $PROPERTY_VALUE"
+                
+                # Add to JSON (handle comma separation)
+                if [[ "$FIRST" == "true" ]]; then
+                  echo "  \"$PROPERTY_NAME\": \"$PROPERTY_VALUE\"" >> "$PROPERTIES_FILE"
+                  FIRST=false
+                else
+                  echo "  ,\"$PROPERTY_NAME\": \"$PROPERTY_VALUE\"" >> "$PROPERTIES_FILE"
+                fi
+                
+                # Also set as individual GitHub outputs for backward compatibility
+                echo "${PROPERTY_NAME,,}=$PROPERTY_VALUE" >> $GITHUB_OUTPUT
+              fi
+            fi
+          done <<< "$PROPERTIES"
+          
+          echo "}" >> "$PROPERTIES_FILE"
+          
+          echo ""
+          echo "Properties JSON file created: $PROPERTIES_FILE"
+          cat "$PROPERTIES_FILE"
+          
+          # Clean up
+          rm -rf "$TEMP_DIR"
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      
+      - name: Install Python dependencies
+        run: |
+          pip install PyYAML
+      
+      - name: Validate properties
+        run: |
+          python validate_properties.py --properties-file extracted-properties.json
+          
+    outputs:
+      domain: ${{ steps.extract-properties.outputs.domain }}
+      owner: ${{ steps.extract-properties.outputs.owner }}
