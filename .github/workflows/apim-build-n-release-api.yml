@@ -1,7 +1,7 @@
 on:
   push:
     paths:
-      - apim/**
+      - apim/**/Conf/*.zip
     branches:
       - main
   workflow_dispatch:
