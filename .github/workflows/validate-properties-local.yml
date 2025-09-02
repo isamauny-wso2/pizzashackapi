@@ -1,7 +1,7 @@
 name: Extract and Validate API Properties
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       zip_path:
         description: 'Path to the ZIP file containing API properties'
