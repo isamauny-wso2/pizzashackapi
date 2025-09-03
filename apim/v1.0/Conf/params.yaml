@@ -10,10 +10,6 @@ environments:
         - displayOnDevportal: true
           deploymentEnvironment: UniversalGW
           deploymentVhost: apim.dev.apis.coach
-      certs:
-        - hostName: apim.dev.apis.coach
-          alias: backendDev
-          path: backendDev.crt
       policies:
         - Gold
 
@@ -26,10 +22,6 @@ environments:
         - displayOnDevportal: true
           deploymentEnvironment: UniversalGW
           deploymentVhost: apim.uat.apis.coach
-      certs:
-        - hostName: apim.uat.apis.coach
-          alias: backendUAT
-          path: backendUAT.crt
       policies:
         - Unlimited
         - Gold
