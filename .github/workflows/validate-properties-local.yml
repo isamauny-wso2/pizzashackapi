@@ -47,41 +47,19 @@ jobs:
           echo "Found api.yaml: $API_YAML"
           echo ""
           
-          # Extract all custom properties dynamically
+          # Extract custom properties using Python script
           echo "Extracting Custom Properties:"
           echo "============================="
           
-          # Create JSON file for properties
+          # Use Python script to extract properties and display them
+          python3 extract_api_properties.py "$API_YAML" --format console --verbose
+          
+          # Generate JSON file for validation script
           PROPERTIES_FILE="extracted-properties.json"
-          echo "{" > "$PROPERTIES_FILE"
+          python3 extract_api_properties.py "$API_YAML" --format json --output "$PROPERTIES_FILE"
           
-          # Find all property sections and extract their values
-          PROPERTIES=$(grep -n ":" "$API_YAML" | grep -E "^\s*[A-Za-z][A-Za-z0-9_-]*:\s*$" | sed 's/[0-9]*:\s*//' | sed 's/:\s*$//')
-          
-          FIRST=true
-          while IFS= read -r PROPERTY_NAME; do
-            if [[ -n "$PROPERTY_NAME" && "$PROPERTY_NAME" != "additionalProperties" ]]; then
-              # Extract the value for this property
-              PROPERTY_VALUE=$(grep -A 3 "$PROPERTY_NAME:" "$API_YAML" | grep "value:" | head -1 | awk '{print $2}' | tr -d '"')
-              
-              if [[ -n "$PROPERTY_VALUE" ]]; then
-                echo "$PROPERTY_NAME: $PROPERTY_VALUE"
-                
-                # Add to JSON (handle comma separation)
-                if [[ "$FIRST" == "true" ]]; then
-                  echo "  \"$PROPERTY_NAME\": \"$PROPERTY_VALUE\"" >> "$PROPERTIES_FILE"
-                  FIRST=false
-                else
-                  echo "  ,\"$PROPERTY_NAME\": \"$PROPERTY_VALUE\"" >> "$PROPERTIES_FILE"
-                fi
-                
-                # Also set as individual GitHub outputs for backward compatibility
-                echo "${PROPERTY_NAME,,}=$PROPERTY_VALUE" >> $GITHUB_OUTPUT
-              fi
-            fi
-          done <<< "$PROPERTIES"
-          
-          echo "}" >> "$PROPERTIES_FILE"
+          # Generate GitHub Actions outputs for backward compatibility
+          python3 extract_api_properties.py "$API_YAML" --format github >> $GITHUB_OUTPUT
           
           echo ""
           echo "Properties JSON file created: $PROPERTIES_FILE"
