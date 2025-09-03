@@ -1,7 +1,7 @@
 on:
   push:
     paths:
-      - apim/**/Conf/*.zip
+      - apim/**/Artifact/*.zip
     branches:
       - main
   workflow_dispatch:
@@ -44,7 +44,7 @@ jobs:
       zip_path: ${{ needs.print_changed_files.outputs.changed_file }}
   release_repo:
     name: Release Repo
-    needs: print_changed_files
+    needs: [ print_changed_files, validate_props ] 
     uses: isamauny-wso2/wso2-workflows/.github/workflows/release-apim-api.yml@main
     with:
       changed_file: ${{ needs.print_changed_files.outputs.changed_file }}
