@@ -22,7 +22,7 @@ jobs:
         # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
         with:
           since_last_remote_commit: true 
-          files: apim/**/Conf/*.zip
+          files: apim/**/Artifact/*.zip
 
       - name: Extract single changed file
         id: extract-file
